@@ -8,7 +8,7 @@ const Popup = () => {
   const [parag, setParag] = useState();
 
   useEffect(() => {
-    const lang = 'en'; // Optional, default is 'en' (English)
+    const lang = 'fr'; // Optional, default is 'en' (English)
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type === 'YOUTUBE_VIDEO_ID') {
@@ -41,14 +41,14 @@ const Popup = () => {
   // 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
 
   const punctuateText = async (text, lang) => {
-    const apiKey = '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'; // Replace with your ChatGPT API key
+    const apiKey = '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'; // Replace with your ChatGPT API key
     const endpoint = 'https://api.openai.com/v1/chat/completions';
   
     // Prepare the request payload
     const payload = {
       model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', content: `The input passed here is a continuous subtitle from a video we are currently watching.translate to ${lang} language, Fill in missing words and punctuate the paragraph. Update the sentences based on the last words, but do not change the words. Do not complain either.` },
+        { role: 'system', content: `translate to ${lang} language, Do not complain either.` },
         { role: 'user', content: text },
       ],
       max_tokens: 1000,
