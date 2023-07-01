@@ -20,10 +20,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             // Send message to the popup script
             chrome.runtime.sendMessage({ type: 'YOUTUBE_VIDEO_ID', videoID });
 
-            // Mute the current tab
-            chrome.tabs.update(currentTab.id, { muted: true }, () => {
-              console.log('Tab muted');
-            });
+            // // Mute the current tab
+            // chrome.tabs.update(currentTab.id, { muted: true }, () => {
+            //   console.log('Tab muted');
+            // });
           } else {
             console.log('Invalid YouTube URL');
             // Reload the tab after a short delay

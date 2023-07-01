@@ -1,4 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch&display=swap');
+
 body {
-    height: 400px;
+    /* height: 400px; */
     width: 400px;
+    font-family: 'Chakra Petch', sans-serif;
 }

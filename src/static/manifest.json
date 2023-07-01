@@ -15,7 +15,8 @@
         "tabs",
         "bookmarks",
         "storage",
-        "identity"
+        "identity",
+        "activeTab"
     ],
     "icons": {
         "16" : "icon.png",
