@@ -84,7 +84,7 @@ const Popup = () => {
       url: 'https://text-translator2.p.rapidapi.com/translate',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
-        'X-RapidAPI-Key': '28754cf323mshe1e49252e469ba7p199522jsnd9ee930decab',
+        'X-RapidAPI-Key': '',
         'X-RapidAPI-Host': 'text-translator2.p.rapidapi.com'
       },
       data: encodedParams,
