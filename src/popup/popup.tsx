@@ -2,23 +2,57 @@ import React, { useState, useEffect } from "react";
 import { getSubtitles } from 'youtube-caption-extractor';
 import axios from 'axios';
 import './popup.css';
+import { useTts } from 'tts-react'
+import type { TTSHookProps } from 'tts-react'
+
+
 
 const Popup = () => {
+  //something is here
+
+  interface CustomProps extends TTSHookProps {
+    highlight?: boolean,
+    lang?: string,
+    rate?: number,
+    voice?: SpeechSynthesisVoice
+  }
+  
+  const CustomTTSComponent = ({ children, highlight = true }: CustomProps) => {
+    const { ttsChildren, state, play, stop, pause } = useTts({
+      children,
+      markTextAsSpoken: highlight,
+      lang: interpretationLanguage === 'en' ? 'en-US' : interpretationLanguage ,
+      rate: 0.8,
+      voice: window.speechSynthesis.getVoices().find(voice => voice.name === 'Alex' && voice.lang === 'en-US')
+    })
+  
+    return (
+      <div>
+        <>
+          <button disabled={state.isPlaying} onClick={play}>Play</button>
+          <button disabled={!state.isPlaying} onClick={pause}>Pause</button>
+          <button onClick={stop}>Stop</button>
+        </>
+        {ttsChildren}
+      </div>
+    )
+  }
+  // 
+
   const [subtitles, setSubtitles] = useState([]);
   const [interpretationLanguage, setInterpretationLanguage] = useState('en');
   const [inputLanguage, setInputLanguage] = useState('en');
   const [parag, setParag] = useState();
 
-  useEffect(() => {
-    const lang = inputLanguage; // Optional, default is 'en' (English)
 
+  useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type === 'YOUTUBE_VIDEO_ID') {
         const videoID = message.videoID;
         console.log('Received YouTube Video ID in popup:', videoID);
 
         // Use the YouTube video ID in your popup script
-        fetchSubtitles(videoID, lang);
+        fetchSubtitles(videoID, inputLanguage);
       }
     });
     chrome.runtime.sendMessage({ type: 'POPUP_READY' });
@@ -40,58 +74,40 @@ const Popup = () => {
   };
 
   const translateText = async (text, targetLanguage) => {
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('source_language', inputLanguage);
+    encodedParams.set('target_language', targetLanguage);
+    encodedParams.set('text', text);
+  
     const options = {
-      method: 'GET',
-      url: 'https://translated-mymemory---translation-memory.p.rapidapi.com/get',
-      params: {
-        langpair: `${inputLanguage}|${targetLanguage}`,
-        q: text,
-        mt: '1',
-        onlyprivate: '0',
-        de: 'a@b.c'
-      },
+      method: 'POST',
+      url: 'https://text-translator2.p.rapidapi.com/translate',
       headers: {
-        'X-RapidAPI-Key': 'a6712fef88msh7f67c78baeaa13dp194b67jsn48e3040f04c0',
-        'X-RapidAPI-Host': 'translated-mymemory---translation-memory.p.rapidapi.com'
-      }
+        'content-type': 'application/x-www-form-urlencoded',
+        'X-RapidAPI-Key': '28754cf323mshe1e49252e469ba7p199522jsnd9ee930decab',
+        'X-RapidAPI-Host': 'text-translator2.p.rapidapi.com'
+      },
+      data: encodedParams,
     };
-
+  
     try {
       const response = await axios.request(options);
-      return response.data.responseData.translatedText;
+      return response.data;
     } catch (error) {
       console.error('Error translating text:', error);
       throw error;
     }
   };
+  
 
-  const speakText = (text, targetLanguage) => {
-    const speech = new SpeechSynthesisUtterance();
-    speech.lang = targetLanguage;
-    speech.text = text;
-    speech.volume = 1;
-    speech.rate = 0.7; // Adjust the rate value to make it slower (0.1 - 10)
-    speech.pitch = 0.8; // Adjust the pitch value to make it deeper (0 - 2)
-    // speech.voiceURI = 'native';
-    speechSynthesis.speak(speech);
-  };
 
 
   const handleSpeakText = async () => {
     const joinedSubtitles = joinSubtitles(subtitles);
-    const translatedText = await translateText(joinedSubtitles, interpretationLanguage);
-  
-    // Punctuate the translatedText
-    const punctuatedText = translatedText.replace(/[.,!?]\s*$/, '.');
-  
-    setParag(punctuatedText);
-    speakText(punctuatedText, interpretationLanguage);
-  
-    // Send punctuatedText to the content script
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      chrome.tabs.sendMessage(activeTab.id, { type: 'PUNCTUATED_TEXT', punctuatedText });
-    });
+    const quicken = await translateText(joinedSubtitles, interpretationLanguage);
+    const translatedText = quicken.data.translatedText
+    console.log(translatedText);
+    setParag(translatedText);
   };
   
 
@@ -103,12 +119,20 @@ const Popup = () => {
     setInterpretationLanguage(e.target.value);
   };
 
+
   return (
     <div className="m-2 flex flex-col">
       <div className="text-center mt-3">
         <h3 className="text-4xl text-blue-700 font-bold">Selman</h3>
         <p className="text-gray-500">Subtitle Translator</p>
       </div>
+
+      <CustomTTSComponent highlight>
+        <div>
+          {parag}
+        </div>
+      </CustomTTSComponent>
+
       <div className="flex flex-col items-center justify-end p-4">
         <div className="mb-2">
           <button
@@ -127,7 +151,6 @@ const Popup = () => {
             <option value="en">English</option>
             <option value="fr">French</option>
             <option value="es">Spanish</option>
-            {/* Add more input language options as needed */}
           </select>
           <select
             className="bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
@@ -137,7 +160,6 @@ const Popup = () => {
             <option value="en">English</option>
             <option value="fr">French</option>
             <option value="es">Spanish</option>
-            {/* Add more output language options as needed */}
           </select>
         </div>
       </div>
