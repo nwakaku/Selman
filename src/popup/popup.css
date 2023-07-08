@@ -1,7 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Nunito:wght@400;500&display=swap');
 
 body {
     /* height: 400px; */
-    width: 400px;
+    width: 350px;
     font-family: 'Chakra Petch', sans-serif;
+    background-color:  #dfe1ee;
+}
+
+.poppin {
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 15px;
+    font-weight: 700;
 }
