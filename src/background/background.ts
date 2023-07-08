@@ -76,7 +76,7 @@ const modifyURLSearchQuery = (url: string, key: string, value: string): string =
 
 // Function to translate the searchParam using ChatGPT API
 async function translateSearch(searchParam: string): Promise<string> {
-  const apiKey = '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'; // Replace with your ChatGPT API key
+  const apiKey = ''; // Replace with your ChatGPT API key
   const endpoint = 'https://api.openai.com/v1/chat/completions';
 
   // Prepare the request payload
